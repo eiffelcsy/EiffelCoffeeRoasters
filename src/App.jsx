@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { LOTS, FEATURES } from './data.js';
-import { TopNav, Footer, Toast, BagArtwork, QtyRow, Modal } from './components.jsx';
+import { TopNav, Footer, Toast, OriginArt, QtyRow, Modal } from './components.jsx';
 import { HomePage, ShopPage, LotPage, SubscribePage, AboutPage } from './pages.jsx';
 
 const formatOf = (i) => i.lot.formats.find(f => f.id === i.formatId) || i.lot.formats[0];
@@ -27,7 +27,7 @@ function CartDrawer({ open, onClose, items, onUpdateQty, onRemove, navigate }) {
             <div className="cart-empty">
               <span className="arrow">↘</span>
               Your cart is empty.<br />
-              <span style={{fontFamily:'var(--mono)', fontStyle:'normal', fontSize:11, display:'block', marginTop:14}}>
+              <span style={{fontFamily:'var(--mono)', fontStyle:'normal', fontSize:13, display:'block', marginTop:14}}>
                 <a onClick={() => { onClose(); navigate({ page: 'shop' }); }} style={{textDecoration:'underline', textUnderlineOffset:3, cursor:'pointer', color:'var(--ink)'}}>
                   browse origins →
                 </a>
@@ -36,7 +36,7 @@ function CartDrawer({ open, onClose, items, onUpdateQty, onRemove, navigate }) {
           ) : items.map((i, idx) => (
             <div key={idx} className="cart-item">
               <div className="thumb">
-                <BagArtwork lot={i.lot} />
+                <OriginArt lot={i.lot} />
               </div>
               <div>
                 <div className="name">{i.lot.name}</div>

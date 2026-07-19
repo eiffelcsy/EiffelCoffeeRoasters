@@ -2,22 +2,20 @@
 
 import { useState, useMemo } from 'react';
 import { LOTS, PROCESSES, ROASTS, SUB_FREQ, SUB_VOLUME, SUB_PREF } from './data.js';
-import { BagArtwork, FlavorRadar, QtyRow, Modal } from './components.jsx';
+import { OriginArt, OriginCarousel, FlavorRadar, QtyRow, Modal } from './components.jsx';
 
 // =================== HOME ===================
 export function HomePage({ navigate }) {
-  const featured = LOTS.find(l => l.featured) || LOTS[0];
   return (
     <main className="page">
       <section className="home-hero">
         <div className="home-hero-text">
-          <h1>Home roasted,<br />for the home barista.</h1>
+          <h1>There's no one way <br /> to coffee.</h1>
           <div className="home-specs">
-            <div className="row"><span className="k">product</span><span className="v">drip coffee bags · box of 10</span></div>
-            <div className="row"><span className="k">also_available</span><span className="v">whole bean · 250g</span></div>
+            <div className="row"><span className="k">product</span><span className="v">drip coffee bags · box of 5</span></div>
+            <div className="row"><span className="k">also_available</span><span className="v">whole beans · 200g</span></div>
             <div className="row"><span className="k">origins</span><span className="v">ethiopia · colombia</span></div>
-            <div className="row"><span className="k">roasted</span><span className="v">to order, weekly</span></div>
-            <div className="row"><span className="k">ships</span><span className="v">in 1–2 days</span></div>
+            <div className="row"><span className="k">roasted</span><span className="v">to order</span></div>
           </div>
           <div className="home-hero-cta-row">
             <button className="btn is-accent" onClick={() => navigate({ page: 'shop' })}>
@@ -25,18 +23,7 @@ export function HomePage({ navigate }) {
             </button>
           </div>
         </div>
-        <div className="bag-card" onClick={() => navigate({ page: 'lot', id: featured.id })}>
-          <BagArtwork lot={featured} />
-        </div>
-      </section>
-
-      <section className="home-strip">
-        {LOTS.map((l) => (
-          <div key={l.id} className="feat-card" onClick={() => navigate({ page: 'lot', id: l.id })}>
-            <div className="feat-num">{`${l.origin.toLowerCase()} · ${l.process}`}</div>
-            <div className="feat-title">{l.name}</div>
-          </div>
-        ))}
+        <OriginCarousel lots={LOTS} navigate={navigate} />
       </section>
     </main>
   );
@@ -96,8 +83,8 @@ export function ShopPage({ navigate, onAdd }) {
     <main className="page">
       <section className="shop-head">
         <div className="shop-title-row">
-          <h1 className="shop-title">Origins</h1>
-          <span className="shop-count">{filtered.length} showing</span>
+          <h1 className="shop-title">Shop</h1>
+          <span className="shop-count">showing {filtered.length} items</span>
         </div>
       </section>
 
@@ -149,7 +136,7 @@ export function ShopPage({ navigate, onAdd }) {
           </div>
         ))}
         {filtered.length === 0 && (
-          <div style={{padding:'80px 0', textAlign:'center', fontFamily:'var(--mono)', fontSize:12, color:'var(--muted)'}}>
+          <div style={{padding:'80px 0', textAlign:'center', fontFamily:'var(--mono)', fontSize:14, color:'var(--muted)'}}>
             Nothing matches that combination. Try clearing a filter.
           </div>
         )}
@@ -177,9 +164,7 @@ export function LotPage({ id, navigate, onAdd }) {
 
       <section className="lot-detail">
         <div className="lot-image-col">
-          <div className="bag-card" style={{aspectRatio:'4/5'}}>
-            <BagArtwork lot={lot} />
-          </div>
+          <OriginArt lot={lot} className="lot-art" />
         </div>
 
         <div className="lot-info-col">
@@ -393,25 +378,9 @@ export function AboutPage({ navigate }) {
         <h1 style={{fontFamily:'var(--serif)', fontWeight:600, fontSize:'clamp(40px,5vw,68px)', letterSpacing:'-0.02em', lineHeight:1.02, margin:'0 0 36px'}}>
           A small roastery that <em style={{color:'var(--accent)'}}>documents everything</em>.
         </h1>
-        <p style={{fontFamily:'var(--mono)', fontSize:14, lineHeight:1.8, color:'var(--ink-2)', maxWidth:620, margin:0}}>
+        <p style={{fontFamily:'var(--mono)', fontSize:16, lineHeight:1.8, color:'var(--ink-2)', maxWidth:620, margin:0}}>
           One roaster, a roast profiler, a cupping sheet for every lot. Everything we know is on the label — origin, altitude, varietal, process, roast date.
         </p>
-      </section>
-
-      <section style={{padding:'56px 0 80px', borderTop:'1px solid var(--rule)'}}>
-        <div style={{display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap:'var(--gutter)'}}>
-          {[
-            { v: '10', k: 'drip bags per box' },
-            { v: '250g', k: 'whole bean bags' },
-            { v: '2,200m', k: 'highest farm altitude' },
-            { v: '001', k: 'first roast · 2026' },
-          ].map(s => (
-            <div key={s.k} style={{borderTop:'1px solid var(--rule)', paddingTop:18}}>
-              <div style={{fontFamily:'var(--serif)', fontSize:64, fontWeight:500, letterSpacing:'-0.02em', lineHeight:1}}>{s.v}</div>
-              <div style={{fontFamily:'var(--mono)', fontSize:11, color:'var(--muted)', marginTop:6}}>{s.k}</div>
-            </div>
-          ))}
-        </div>
       </section>
     </main>
   );

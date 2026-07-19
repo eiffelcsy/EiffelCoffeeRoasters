@@ -20,6 +20,11 @@ Typography follows the bag labels: bold serif for titles, IBM Plex Mono for
 everything else. The palette is textured off-white on kraft cardboard, matching
 the physical packaging.
 
+Origin visuals are AI-generated abstract artwork — drop image files into
+`public/origins/` (see the README there). Until a file exists, the site shows
+a gradient placeholder built from that coffee's flavour palette (set per lot
+in `src/data.js`). The home page cycles the origins in a borderless carousel.
+
 Products are sold in two formats per lot — drip bags (box of 10, the primary
 format) and whole bean 250g — defined per lot in `src/data.js`.
 

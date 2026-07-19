@@ -37,7 +37,7 @@ body {
   color: var(--ink);
   font-family: var(--mono);
   font-weight: 400;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -54,6 +54,12 @@ body::before {
   pointer-events: none;
   opacity: 0.5;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/></svg>");
+}
+
+/* app shell: the page area spans at least the viewport (minus the sticky
+   nav) so the footer starts below the fold on every page, incl. shop/about */
+#app-root > div:has(.page, .sub-page) {
+  min-height: calc(100vh - 68px);
 }
 
 ::selection { background: var(--ink); color: var(--paper); }
@@ -87,26 +93,25 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 .brand-lockup {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   cursor: pointer;
 }
-.brand-lockup .lattice { width: 16px; height: 22px; flex: none; }
+.brand-lockup .lattice { width: 36px; height: 36px; margin: -8px 0 -8px -6px; flex: none; }
 .brand-lockup .wordmark {
   font-family: var(--mono);
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 16px;
   letter-spacing: -0.01em;
 }
 .nav-links {
   display: flex;
   gap: 28px;
-  margin-left: 12px;
+  margin-left: 20px;
 }
 .nav-link {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 14px;
   color: var(--ink-2);
-  padding: 6px 0;
+  padding: 4px 0;
   position: relative;
   transition: color var(--t-fast) var(--ease);
   cursor: pointer;
@@ -136,7 +141,7 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
   align-items: center;
   gap: 8px;
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 14px;
   padding: 6px 10px;
   border-radius: 999px;
   transition: background var(--t-fast);
@@ -147,7 +152,7 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
   color: var(--paper);
   border-radius: 999px;
   padding: 1px 7px;
-  font-size: 11px;
+  font-size: 13px;
   min-width: 20px;
   text-align: center;
   transform-origin: center;
@@ -176,7 +181,7 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 /* annotation bar — small "// breadcrumb" line under nav */
 .crumb {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
   padding: 14px 0 8px;
   display: flex;
@@ -197,7 +202,7 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 .home-hero-text { padding-top: 24px; }
 .home-eyebrow {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 14px;
   color: var(--muted);
   margin-bottom: 28px;
 }
@@ -213,7 +218,7 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 .home-hero h1 em { font-style: italic; font-weight: 500; color: var(--accent); }
 .home-hero-sub {
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.7;
   max-width: 420px;
   color: var(--ink-2);
@@ -232,23 +237,57 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
   padding: 10px 0;
   border-bottom: 1px dashed var(--line);
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 14px;
 }
 .home-specs .row .k { color: var(--muted); }
 .home-specs .row .v { text-align: right; }
 .home-hero-cta-row { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
 
-.bag-card {
-  position: relative;
-  background: var(--paper-2);
-  border: 1px solid var(--rule);
-  aspect-ratio: 4/5;
-  padding: 28px;
-  overflow: hidden;
-  cursor: pointer;
-  transition: transform var(--t-med) var(--ease);
+/* ============== ORIGIN ARTWORK ============== */
+/* AI-generated abstract artwork per origin (drop files in public/origins/).
+   Falls back to a flavour-note gradient until the image exists. */
+.origin-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
-.bag-card:hover { transform: translateY(-4px); }
+.lot-art {
+  height: auto;
+  aspect-ratio: 4/5;
+}
+
+/* home carousel — minimalist, borderless crossfade */
+.carousel { cursor: pointer; }
+.carousel-frame {
+  position: relative;
+  aspect-ratio: 4/5;
+  overflow: hidden;
+}
+.carousel-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 700ms var(--ease);
+}
+.carousel-slide.is-active { opacity: 1; }
+.carousel-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 14px;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--muted);
+}
+.carousel-dots { display: flex; gap: 8px; }
+.carousel-dot {
+  width: 20px;
+  height: 2px;
+  background: var(--line);
+  transition: background var(--t-fast);
+}
+.carousel-dot.is-on { background: var(--ink); }
 
 /* CTA buttons */
 .btn {
@@ -256,7 +295,7 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
   align-items: center;
   gap: 10px;
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: 15px;
   padding: 12px 22px;
   border-radius: 999px;
   border: 1px solid var(--ink);
@@ -291,7 +330,7 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 }
 .feat-card .feat-num {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
   margin-bottom: 12px;
 }
@@ -311,7 +350,7 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 .shop-title-row {
   display: flex;
   align-items: baseline;
-  gap: 18px;
+  justify-content: space-between;
   margin-bottom: 18px;
 }
 .shop-title {
@@ -324,12 +363,12 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 }
 .shop-count {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 14px;
   color: var(--muted);
 }
 .shop-query {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 14px;
   color: var(--muted);
 }
 .shop-query .sql { color: var(--accent); }
@@ -343,13 +382,13 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 }
 .filter-label {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
   margin-right: 6px;
 }
 .chip {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 13px;
   padding: 6px 12px;
   border-radius: 999px;
   border: 1px solid var(--line);
@@ -367,7 +406,7 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 .sort-select {
   margin-left: auto;
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 13px;
   background: transparent;
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -382,7 +421,7 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 }
 .lot-row {
   display: grid;
-  grid-template-columns: 1.3fr 1fr 0.8fr 1.5fr 180px;
+  grid-template-columns: 1.3fr 1fr 0.8fr 1.5fr 190px;
   gap: 18px;
   padding: 22px 0;
   border-top: 1px solid var(--line);
@@ -395,22 +434,22 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 .lot-row.is-out { opacity: 0.45; cursor: not-allowed; }
 .lot-row.head {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
   padding: 10px 0;
   cursor: default;
-  border-top: 2px solid var(--rule);
+  border-top: 1px solid var(--rule);
   background: transparent;
 }
 .lot-row.head:hover { background: transparent; }
 
 .lot-name { font-family: var(--serif); font-size: 22px; font-weight: 500; line-height: 1.1; }
-.lot-orig { font-family: var(--mono); font-size: 12px; color: var(--ink-2); }
-.lot-process { font-family: var(--mono); font-size: 12px; }
-.lot-notes { font-family: var(--mono); font-size: 12px; color: var(--ink-2); line-height: 1.4; }
+.lot-orig { font-family: var(--mono); font-size: 14px; color: var(--ink-2); }
+.lot-process { font-family: var(--mono); font-size: 14px; }
+.lot-notes { font-family: var(--mono); font-size: 14px; color: var(--ink-2); line-height: 1.4; }
 .lot-add { text-align: right; }
-.lot-add .btn { padding: 8px 16px; font-size: 12px; white-space: nowrap; }
-.lot-out-label { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.lot-add .btn { padding: 8px 16px; font-size: 14px; white-space: nowrap; }
+.lot-out-label { font-family: var(--mono); font-size: 13px; color: var(--muted); }
 
 /* ============== LOT DETAIL ============== */
 .lot-detail {
@@ -424,7 +463,7 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 .lot-info-col { padding-top: 16px; }
 .lot-eyebrow {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 14px;
   color: var(--muted);
   margin-bottom: 22px;
 }
@@ -438,7 +477,7 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 }
 .lot-subtitle {
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: 15px;
   color: var(--ink-2);
   margin-bottom: 32px;
 }
@@ -450,7 +489,7 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 }
 .flavor-pill {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 14px;
   padding: 6px 14px;
   border: 1px solid var(--ink-2);
   border-radius: 999px;
@@ -468,27 +507,27 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
   padding: 13px 0;
   border-bottom: 1px solid var(--line);
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 14px;
 }
 .lot-specs .row .k { color: var(--muted); }
 .lot-specs .row .v { text-align: right; }
 
 .lot-story {
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.8;
   color: var(--ink-2);
   margin: 36px 0;
   max-width: 520px;
 }
 
-/* grind selector */
+/* format selector */
 .option-group {
   margin-bottom: 24px;
 }
 .option-group label {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
   display: block;
   margin-bottom: 10px;
@@ -503,7 +542,7 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
   border: 1px solid var(--line);
   border-radius: 999px;
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 14px;
   cursor: pointer;
   transition: all var(--t-fast);
   color: var(--ink-2);
@@ -527,14 +566,14 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
   width: 34px;
   height: 36px;
   font-family: var(--mono);
-  font-size: 16px;
+  font-size: 18px;
   color: var(--ink-2);
   transition: background var(--t-fast);
 }
 .qty-row button:hover { background: var(--paper-2); }
 .qty-row .qty {
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: 15px;
   width: 36px;
   text-align: center;
   font-variant-numeric: tabular-nums;
@@ -546,11 +585,11 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
   align-items: stretch;
   margin: 32px 0 28px;
 }
-.add-row .btn { flex: 1; justify-content: center; padding: 16px; font-size: 14px; }
+.add-row .btn { flex: 1; justify-content: center; padding: 16px; font-size: 16px; }
 
 .lot-meta {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
   display: flex;
   gap: 14px;
@@ -571,7 +610,7 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 }
 .radar-head h4 {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -614,7 +653,7 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 
 .sub-step-label {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
   margin-bottom: 14px;
 }
@@ -658,7 +697,7 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
   top: 16px;
   right: 16px;
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
 }
 .sub-card.is-selected .corner { color: var(--accent); }
@@ -672,7 +711,7 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 }
 .sub-card .figure-unit {
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: 15px;
   color: var(--muted);
   margin-bottom: 22px;
 }
@@ -686,7 +725,7 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 }
 .sub-card .price {
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: 15px;
   margin-top: 16px;
 }
 
@@ -706,7 +745,7 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 }
 .sub-summary h3 {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -719,7 +758,7 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
   padding: 12px 0;
   border-top: 1px solid var(--line);
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: 15px;
 }
 .sub-summary-row .k { color: var(--muted); }
 .sub-summary-row .v.serif { font-family: var(--serif); font-size: 18px; }
@@ -736,7 +775,7 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 }
 .sub-summary-total small {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 14px;
   color: var(--muted);
 }
 
@@ -767,7 +806,7 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 }
 .cart-drawer.is-open { transform: translateX(0); }
 .cart-head {
-  padding: 22px 28px;
+  padding: 19px 28px;
   border-bottom: 1px solid var(--rule);
   display: flex;
   justify-content: space-between;
@@ -775,7 +814,7 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 }
 .cart-head h3 {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 14px;
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -783,7 +822,7 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 }
 .cart-close {
   font-family: var(--mono);
-  font-size: 18px;
+  font-size: 20px;
   width: 28px; height: 28px;
   display: grid; place-items: center;
   border-radius: 50%;
@@ -795,7 +834,7 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
   padding: 80px 24px;
   text-align: center;
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 14px;
   color: var(--muted);
 }
 .cart-empty .arrow { display: block; margin-bottom: 18px; font-size: 32px; }
@@ -810,17 +849,15 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 }
 .cart-item .thumb {
   width: 56px; height: 70px;
-  background: var(--paper-2);
-  border: 1px solid var(--line);
-  display: grid; place-items: center;
+  overflow: hidden;
 }
 .cart-item .name { font-family: var(--serif); font-size: 17px; line-height: 1.2; margin-bottom: 4px; }
-.cart-item .meta { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+.cart-item .meta { font-family: var(--mono); font-size: 13px; color: var(--muted); margin-bottom: 8px; }
 .cart-item .qty-row { transform: scale(0.85); transform-origin: left; }
-.cart-item .price { font-family: var(--mono); font-size: 13px; text-align: right; }
+.cart-item .price { font-family: var(--mono); font-size: 15px; text-align: right; }
 .cart-item .remove {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
   margin-top: 6px;
   display: block;
@@ -839,7 +876,7 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
   display: flex;
   justify-content: space-between;
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 14px;
   padding: 6px 0;
   color: var(--muted);
 }
@@ -870,17 +907,17 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
   gap: 40px;
 }
 .foot-brand { max-width: 340px; }
-.foot-brand .lattice { width: 22px; height: 30px; margin-bottom: 14px; }
+.foot-brand .lattice { width: 52px; height: 52px; margin: -6px 0 8px -8px; }
 .foot-brand p {
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.6;
   color: var(--ink-2);
   margin: 0 0 16px;
 }
 .foot-col h5 {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--muted);
@@ -888,7 +925,7 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
   font-weight: 500;
 }
 .foot-col ul { list-style: none; margin: 0; padding: 0; }
-.foot-col li { padding: 4px 0; font-family: var(--mono); font-size: 13px; }
+.foot-col li { padding: 4px 0; font-family: var(--mono); font-size: 15px; }
 .foot-col a { cursor: pointer; }
 .foot-col a:hover { color: var(--accent); }
 .foot-base {
@@ -898,7 +935,7 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
   display: flex;
   justify-content: space-between;
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
 }
 
@@ -921,7 +958,7 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 }
 .modal-eyebrow {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -936,13 +973,13 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 }
 .modal-sub {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 14px;
   color: var(--muted);
   margin-bottom: 24px;
 }
 .modal-text {
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: 15px;
   color: var(--ink-2);
   margin: 0 0 8px;
 }
@@ -970,12 +1007,14 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
   padding: 14px 22px;
   border-radius: 999px;
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 14px;
   z-index: 120;
   opacity: 0;
   transition: opacity var(--t-med), transform var(--t-med) var(--ease);
   pointer-events: none;
   display: flex; gap: 10px; align-items: center;
+  white-space: nowrap;
+  max-width: calc(100vw - 24px);
 }
 .toast.is-on { opacity: 1; transform: translateX(-50%) translateY(0); }
 
@@ -983,7 +1022,6 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 @media (max-width: 1100px) {
   .home-hero, .lot-detail { grid-template-columns: 1fr; }
   .lot-image-col { position: static; }
-  .home-intro { padding: 64px 0; }
   .sub-options { grid-template-columns: 1fr; }
   .foot-grid { grid-template-columns: 1fr 1fr; }
 }

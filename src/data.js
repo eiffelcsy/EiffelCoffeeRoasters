@@ -19,12 +19,11 @@ export const LOTS = [
     roastLevel: 3,
     altitude: '1,800 – 2,200m',
     varietal: 'heirloom',
-    score: 87.0,
-    price: 16,
-    weight: '250g',
+    price: 7.5,
+    weight: '200g',
     formats: [
-      { id: 'drip10', label: 'drip bags · box of 10', price: 16 },
-      { id: 'beans250', label: 'whole bean · 250g', price: 21 },
+      { id: 'drip05', label: 'drip bags · box of 5', price: 7.5 },
+      { id: 'beans200', label: 'whole beans · 200g', price: 15 },
     ],
     notes: ['prunes', 'raisins', 'stone fruits', "baker's chocolate", 'nougat'],
     flavors: { floral: 0.48, acid: 0.64, body: 0.68, sweet: 0.86, bitter: 0.30, aroma: 0.88 },
@@ -36,6 +35,10 @@ export const LOTS = [
     color: 'sand',
     processLabel: 'natural',
     noteLines: ['prunes, raisins', 'stone fruits', "baker's chocolate, nougat"],
+    // AI artwork: drop the file at public/origins/guji-bule-hora.jpg
+    image: '/origins/guji-bule-hora.jpg',
+    // placeholder gradient colours (prune, stone fruit, nougat)
+    palette: ['#5f4433', '#96674a', '#d9b98a'],
   },
   {
     id: 2,
@@ -48,12 +51,11 @@ export const LOTS = [
     roastLevel: 5,
     altitude: '1,500 – 2,000m',
     varietal: 'typica, caturra, castillo',
-    score: 84.5,
-    price: 14,
-    weight: '250g',
+    price: 7.5,
+    weight: '200g',
     formats: [
-      { id: 'drip10', label: 'drip bags · box of 10', price: 14 },
-      { id: 'beans250', label: 'whole bean · 250g', price: 18 },
+      { id: 'drip05', label: 'drip bags · box of 5', price: 7.5 },
+      { id: 'beans200', label: 'whole beans · 200g', price: 15 },
     ],
     notes: ['toffee', 'red fruit', 'cocoa nibs', 'caramel'],
     flavors: { floral: 0.26, acid: 0.58, body: 0.72, sweet: 0.88, bitter: 0.36, aroma: 0.62 },
@@ -64,6 +66,10 @@ export const LOTS = [
     color: 'rust',
     processLabel: 'fully washed',
     noteLines: ['toffee', 'red fruit', 'cocoa nibs, caramel'],
+    // AI artwork: drop the file at public/origins/excelso.jpg
+    image: '/origins/excelso.jpg',
+    // placeholder gradient colours (cocoa, red fruit, toffee)
+    palette: ['#6f4c2c', '#a4553d', '#dcb277'],
   },
 ];
 
