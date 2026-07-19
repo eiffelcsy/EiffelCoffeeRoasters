@@ -1,14 +1,18 @@
 /* eiffel.coffee.roasters — root app */
 
 import { useState, useEffect } from 'react';
-import { LOTS } from './data.js';
-import { TopNav, Footer, Toast, BagArtwork, QtyRow } from './components.jsx';
+import { LOTS, FEATURES } from './data.js';
+import { TopNav, Footer, Toast, BagArtwork, QtyRow, Modal } from './components.jsx';
 import { HomePage, ShopPage, LotPage, SubscribePage, AboutPage } from './pages.jsx';
 
+const formatOf = (i) => i.lot.formats.find(f => f.id === i.formatId) || i.lot.formats[0];
+
 function CartDrawer({ open, onClose, items, onUpdateQty, onRemove, navigate }) {
-  const subtotal = items.reduce((s, i) => s + i.lot.price * i.qty, 0);
+  const [pendingRemove, setPendingRemove] = useState(null);
+  const subtotal = items.reduce((s, i) => s + formatOf(i).price * i.qty, 0);
   const shipping = subtotal === 0 ? 0 : subtotal >= 40 ? 0 : 6;
   const total = subtotal + shipping;
+  const pendingItem = pendingRemove !== null ? items[pendingRemove] : null;
 
   return (
     <>
@@ -25,7 +29,7 @@ function CartDrawer({ open, onClose, items, onUpdateQty, onRemove, navigate }) {
               Your cart is empty.<br />
               <span style={{fontFamily:'var(--mono)', fontStyle:'normal', fontSize:11, display:'block', marginTop:14}}>
                 <a onClick={() => { onClose(); navigate({ page: 'shop' }); }} style={{textDecoration:'underline', textUnderlineOffset:3, cursor:'pointer', color:'var(--ink)'}}>
-                  browse lots →
+                  browse origins →
                 </a>
               </span>
             </div>
@@ -36,12 +40,12 @@ function CartDrawer({ open, onClose, items, onUpdateQty, onRemove, navigate }) {
               </div>
               <div>
                 <div className="name">{i.lot.name}</div>
-                <div className="meta">lot #{String(i.lot.id).padStart(3,'0')} · {i.grind}</div>
+                <div className="meta">{formatOf(i).label}</div>
                 <QtyRow value={i.qty} onChange={(q) => onUpdateQty(idx, q)} />
               </div>
               <div>
-                <div className="price">${(i.lot.price * i.qty).toFixed(2)}</div>
-                <a className="remove" onClick={() => onRemove(idx)}>remove</a>
+                <div className="price">${(formatOf(i).price * i.qty).toFixed(2)}</div>
+                <a className="remove" onClick={() => setPendingRemove(idx)}>remove</a>
               </div>
             </div>
           ))}
@@ -66,6 +70,21 @@ function CartDrawer({ open, onClose, items, onUpdateQty, onRemove, navigate }) {
           </div>
         )}
       </aside>
+
+      {pendingItem && (
+        <Modal open onClose={() => setPendingRemove(null)}>
+          <div className="modal-eyebrow">// remove item</div>
+          <div className="modal-title">{pendingItem.lot.name}</div>
+          <div className="modal-sub">{formatOf(pendingItem).label} · qty {pendingItem.qty}</div>
+          <p className="modal-text">Remove this item from your cart?</p>
+          <div className="modal-actions">
+            <button className="btn is-ghost" onClick={() => setPendingRemove(null)}>keep it</button>
+            <button className="btn is-accent" onClick={() => { onRemove(pendingRemove); setPendingRemove(null); }}>
+              remove <span className="arrow">→</span>
+            </button>
+          </div>
+        </Modal>
+      )}
     </>
   );
 }
@@ -76,15 +95,15 @@ function loadCart() {
   try {
     const raw = JSON.parse(localStorage.getItem(CART_KEY) || '[]');
     return raw
-      .map(i => ({ lot: LOTS.find(l => l.id === i.lotId), grind: i.grind, qty: i.qty }))
-      .filter(i => i.lot && i.qty > 0);
+      .map(i => ({ lot: LOTS.find(l => l.id === i.lotId), formatId: i.formatId, qty: i.qty }))
+      .filter(i => i.lot && i.lot.formats.some(f => f.id === i.formatId) && i.qty > 0);
   } catch {
     return [];
   }
 }
 
 function saveCart(items) {
-  localStorage.setItem(CART_KEY, JSON.stringify(items.map(i => ({ lotId: i.lot.id, grind: i.grind, qty: i.qty }))));
+  localStorage.setItem(CART_KEY, JSON.stringify(items.map(i => ({ lotId: i.lot.id, formatId: i.formatId, qty: i.qty }))));
 }
 
 export default function App() {
@@ -103,15 +122,15 @@ export default function App() {
 
   const navigate = (r) => setRoute(r);
 
-  const addToCart = (lot, grind, qty) => {
+  const addToCart = (lot, formatId, qty) => {
     setCart(prev => {
-      const idx = prev.findIndex(i => i.lot.id === lot.id && i.grind === grind);
+      const idx = prev.findIndex(i => i.lot.id === lot.id && i.formatId === formatId);
       if (idx >= 0) {
         const next = [...prev];
         next[idx] = { ...next[idx], qty: next[idx].qty + qty };
         return next;
       }
-      return [...prev, { lot, grind, qty }];
+      return [...prev, { lot, formatId, qty }];
     });
     setBumped(true);
     setTimeout(() => setBumped(false), 400);
@@ -129,9 +148,9 @@ export default function App() {
 
   let pageEl;
   if (route.page === 'home')      pageEl = <HomePage navigate={navigate} />;
-  else if (route.page === 'shop') pageEl = <ShopPage navigate={navigate} />;
+  else if (route.page === 'shop') pageEl = <ShopPage navigate={navigate} onAdd={addToCart} />;
   else if (route.page === 'lot')  pageEl = <LotPage id={route.id} navigate={navigate} onAdd={addToCart} />;
-  else if (route.page === 'subscribe') pageEl = <SubscribePage navigate={navigate} onSubscribe={() => {}} />;
+  else if (route.page === 'subscribe' && FEATURES.subscriptions) pageEl = <SubscribePage navigate={navigate} onSubscribe={() => {}} />;
   else if (route.page === 'about') pageEl = <AboutPage navigate={navigate} />;
   else pageEl = <HomePage navigate={navigate} />;
 

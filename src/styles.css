@@ -3,18 +3,20 @@
    ======================================================================== */
 
 :root {
-  --paper:  #ebe6dc;
-  --paper-2:#e1dccf;
-  --ink:    #221e1a;
-  --ink-2:  #4a423a;
-  --accent: #2a3a2a;
-  --accent-soft: #3d5240;
-  --muted:  #8a8275;
-  --line:   #c8c0b0;
-  --rule:   #221e1a;
+  /* textured off-white on cardboard */
+  --paper:  #f1ede3;
+  --paper-2:#e6dfd0;
+  --ink:    #26211b;
+  --ink-2:  #4c4438;
+  --accent: #8a6842;
+  --accent-soft: #9d7c55;
+  --muted:  #988b74;
+  --line:   #d6cbb6;
+  --rule:   #26211b;
+  --kraft:  #c9ad83;
 
-  --serif: 'Newsreader', 'Times New Roman', serif;
-  --mono:  'JetBrains Mono', ui-monospace, monospace;
+  --serif: 'Ancizar Serif', serif;
+  --mono:  'IBM Plex Mono', ui-monospace, monospace;
   --seal:  #b23a2e;
 
   --pad-page: 48px;
@@ -41,6 +43,17 @@ body {
   text-rendering: optimizeLegibility;
   transition: background var(--t-med) var(--ease), color var(--t-med) var(--ease);
   min-height: 100vh;
+}
+
+/* paper-grain texture over the whole page */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/></svg>");
 }
 
 ::selection { background: var(--ink); color: var(--paper); }
@@ -118,23 +131,6 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
   align-items: center;
   gap: 24px;
 }
-.nav-search {
-  background: transparent;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 6px 12px 6px 28px;
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--ink);
-  width: 220px;
-  position: relative;
-  transition: border-color var(--t-fast), width var(--t-med) var(--ease);
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a8275' stroke-width='1.6'><circle cx='11' cy='11' r='6'/><line x1='15.5' y1='15.5' x2='20' y2='20'/></svg>");
-  background-repeat: no-repeat;
-  background-size: 14px;
-  background-position: 8px center;
-}
-.nav-search:focus { outline: none; border-color: var(--ink); width: 260px; }
 .cart-btn {
   display: flex;
   align-items: center;
@@ -205,40 +201,41 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
   color: var(--muted);
   margin-bottom: 28px;
 }
-/* wabi-sabi: enso watermark behind hero */
-.home-enso {
-  position: absolute;
-  top: -30px;
-  right: 38%;
-  color: var(--ink);
-  opacity: 0.06;
-  pointer-events: none;
-  z-index: 0;
-}
-.home-hero-text, .home-hero .bag-card { position: relative; z-index: 1; }
-/* seal accent used as a floating stamp */
-.seal-stamp {
-  display: inline-flex;
-  transform: rotate(-6deg);
-}
 .home-hero h1 {
   font-family: var(--serif);
-  font-weight: 300;
+  font-weight: 600;
   font-size: clamp(48px, 6.8vw, 92px);
-  line-height: 0.96;
+  line-height: 0.98;
   letter-spacing: -0.02em;
   margin: 0 0 28px;
   text-wrap: balance;
 }
-.home-hero h1 em { font-style: italic; font-weight: 300; color: var(--accent); }
+.home-hero h1 em { font-style: italic; font-weight: 500; color: var(--accent); }
 .home-hero-sub {
-  font-family: var(--serif);
-  font-size: 19px;
-  line-height: 1.55;
-  max-width: 460px;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.7;
+  max-width: 420px;
   color: var(--ink-2);
   margin-bottom: 36px;
 }
+/* hero spec sheet — key/value rows like the bag label */
+.home-specs {
+  border-top: 1px solid var(--rule);
+  max-width: 440px;
+  margin: 0 0 36px;
+}
+.home-specs .row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--line);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.home-specs .row .k { color: var(--muted); }
+.home-specs .row .v { text-align: right; }
 .home-hero-cta-row { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
 
 .bag-card {
@@ -300,40 +297,11 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 }
 .feat-card .feat-title {
   font-family: var(--serif);
-  font-size: 22px;
+  font-size: 24px;
+  font-weight: 500;
   line-height: 1.2;
-  margin-bottom: 8px;
-}
-.feat-card .feat-sub {
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--muted);
 }
 .feat-card:hover .feat-title { font-style: italic; }
-
-/* big intro block */
-.home-intro {
-  padding: 100px 0;
-  border-top: 1px solid var(--rule);
-  display: grid;
-  grid-template-columns: 1fr 1.4fr;
-  gap: 80px;
-}
-.home-intro-label {
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--muted);
-}
-.home-intro-body {
-  font-family: var(--serif);
-  font-size: 28px;
-  line-height: 1.35;
-  font-weight: 300;
-  letter-spacing: -0.005em;
-  color: var(--ink);
-  text-wrap: pretty;
-}
-.home-intro-body em { font-style: italic; color: var(--accent); }
 
 /* ============== SHOP / CATALOG ============== */
 .shop-head {
@@ -349,7 +317,7 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 .shop-title {
   font-family: var(--serif);
   font-size: 56px;
-  font-weight: 300;
+  font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1;
   margin: 0;
@@ -408,13 +376,13 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
   cursor: pointer;
 }
 
-/* lot table */
+/* origins table */
 .lot-table {
   border-bottom: 1px solid var(--rule);
 }
 .lot-row {
   display: grid;
-  grid-template-columns: 60px 1.4fr 1fr 1.6fr 70px 90px 36px;
+  grid-template-columns: 1.3fr 1fr 0.8fr 1.5fr 180px;
   gap: 18px;
   padding: 22px 0;
   border-top: 1px solid var(--line);
@@ -424,7 +392,6 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
   position: relative;
 }
 .lot-row:hover { background: var(--paper-2); }
-.lot-row:hover .lot-arrow { transform: translateX(4px); opacity: 1; }
 .lot-row.is-out { opacity: 0.45; cursor: not-allowed; }
 .lot-row.head {
   font-family: var(--mono);
@@ -437,28 +404,13 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 }
 .lot-row.head:hover { background: transparent; }
 
-.lot-num { font-family: var(--mono); font-size: 12px; color: var(--muted); }
-.lot-origin {
-  display: flex; flex-direction: column; gap: 2px;
-}
-.lot-origin .name { font-family: var(--serif); font-size: 22px; line-height: 1.1; }
-.lot-origin .region { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.lot-name { font-family: var(--serif); font-size: 22px; font-weight: 500; line-height: 1.1; }
+.lot-orig { font-family: var(--mono); font-size: 12px; color: var(--ink-2); }
 .lot-process { font-family: var(--mono); font-size: 12px; }
-.lot-notes { font-family: var(--serif); font-style: italic; font-size: 16px; color: var(--ink-2); line-height: 1.3; }
-.lot-score { font-family: var(--mono); font-size: 13px; }
-.lot-price { font-family: var(--mono); font-size: 14px; text-align: right; }
-.lot-arrow {
-  width: 16px;
-  font-family: var(--mono);
-  color: var(--muted);
-  opacity: 0.5;
-  transition: transform var(--t-med) var(--ease), opacity var(--t-fast);
-}
-.lot-row.is-out .lot-price::after {
-  content: ' · sold out';
-  color: var(--muted);
-  font-size: 11px;
-}
+.lot-notes { font-family: var(--mono); font-size: 12px; color: var(--ink-2); line-height: 1.4; }
+.lot-add { text-align: right; }
+.lot-add .btn { padding: 8px 16px; font-size: 12px; white-space: nowrap; }
+.lot-out-label { font-family: var(--mono); font-size: 11px; color: var(--muted); }
 
 /* ============== LOT DETAIL ============== */
 .lot-detail {
@@ -479,7 +431,7 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 .lot-title {
   font-family: var(--serif);
   font-size: clamp(48px, 5.6vw, 72px);
-  font-weight: 300;
+  font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1;
   margin: 0 0 14px;
@@ -497,9 +449,8 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
   margin-bottom: 36px;
 }
 .flavor-pill {
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: 16px;
+  font-family: var(--mono);
+  font-size: 12px;
   padding: 6px 14px;
   border: 1px solid var(--ink-2);
   border-radius: 999px;
@@ -523,11 +474,12 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 .lot-specs .row .v { text-align: right; }
 
 .lot-story {
-  font-family: var(--serif);
-  font-size: 18px;
-  line-height: 1.55;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.8;
   color: var(--ink-2);
   margin: 36px 0;
+  max-width: 520px;
 }
 
 /* grind selector */
@@ -842,8 +794,8 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 .cart-empty {
   padding: 80px 24px;
   text-align: center;
-  font-family: var(--serif);
-  font-style: italic;
+  font-family: var(--mono);
+  font-size: 12px;
   color: var(--muted);
 }
 .cart-empty .arrow { display: block; margin-bottom: 18px; font-size: 32px; }
@@ -914,15 +866,15 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 }
 .foot-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
+  grid-template-columns: 2fr 1fr 1fr;
   gap: 40px;
 }
 .foot-brand { max-width: 340px; }
 .foot-brand .lattice { width: 22px; height: 30px; margin-bottom: 14px; }
 .foot-brand p {
-  font-family: var(--serif);
-  font-size: 16px;
-  line-height: 1.5;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.6;
   color: var(--ink-2);
   margin: 0 0 16px;
 }
@@ -950,6 +902,63 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
   color: var(--muted);
 }
 
+/* ============== MODALS ============== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(38, 33, 27, 0.4);
+  z-index: 140;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  animation: modalFade var(--t-med) var(--ease);
+}
+.modal {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  padding: 28px;
+  animation: pageIn var(--t-med) var(--ease);
+}
+.modal-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 16px;
+}
+.modal-title {
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+.modal-sub {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 24px;
+}
+.modal-text {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ink-2);
+  margin: 0 0 8px;
+}
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+@keyframes modalFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 /* ============== TOASTS ============== */
 .toast {
   position: fixed;
@@ -974,15 +983,15 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 @media (max-width: 1100px) {
   .home-hero, .lot-detail { grid-template-columns: 1fr; }
   .lot-image-col { position: static; }
-  .home-intro { grid-template-columns: 1fr; gap: 24px; padding: 64px 0; }
+  .home-intro { padding: 64px 0; }
   .sub-options { grid-template-columns: 1fr; }
   .foot-grid { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 720px) {
   :root { --pad-page: 22px; }
-  .nav-links, .nav-search { display: none; }
-  .lot-row { grid-template-columns: 40px 1fr 60px 20px; }
-  .lot-row .lot-process, .lot-row .lot-notes, .lot-row .lot-score { display: none; }
+  .nav-links { display: none; }
+  .lot-row { grid-template-columns: 1fr auto; }
+  .lot-row .lot-process, .lot-row .lot-notes, .lot-row .lot-orig { display: none; }
   .lot-row.head { display: none; }
   .home-strip { grid-template-columns: 1fr; }
   .shop-title { font-size: 36px; }

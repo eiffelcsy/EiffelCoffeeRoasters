@@ -1,5 +1,7 @@
 /* eiffel.coffee.roasters — shared components */
 
+import { FEATURES } from './data.js';
+
 // =================== TOWER MARK ===================
 // Line-drawn Eiffel tower, matching the bag-label logo.
 export function Lattice({ size = 16, stroke = 1.1, className = 'lattice' }) {
@@ -43,7 +45,7 @@ export function TopNav({ route, navigate, cartCount, cartBumped, onCartOpen }) {
   const links = [
     { id: 'home', label: 'home' },
     { id: 'shop', label: 'shop' },
-    { id: 'subscribe', label: 'subscribe' },
+    ...(FEATURES.subscriptions ? [{ id: 'subscribe', label: 'subscribe' }] : []),
     { id: 'about', label: 'about' },
   ];
   return (
@@ -63,7 +65,6 @@ export function TopNav({ route, navigate, cartCount, cartBumped, onCartOpen }) {
           })}
         </div>
         <div className="nav-right">
-          <input className="nav-search" placeholder="search lots, origins, notes…" />
           <button className={'cart-btn' + (cartBumped ? ' bumped' : '')} onClick={onCartOpen}>
             <span>cart</span>
             <span className="count">{cartCount}</span>
@@ -105,16 +106,17 @@ export function Enso({ size = 120, className = '' }) {
 }
 
 // =================== BAG ARTWORK ===================
-// The bag front, drawn to match the real labels: tower + wordmark header,
-// serif lot name, spec rows, "> tasting notes", roasted_on, 250g.
+// The bag front, drawn to match the real packaging: kraft cardboard bag
+// with a textured off-white label — tower + wordmark header, serif lot
+// name, spec rows, "> tasting notes", roasted_on, 250g.
 export function BagArtwork({ lot }) {
   const tones = {
-    sand: { bg: '#f1ecdd', ink: '#221e1a' },
-    rust: { bg: '#f4f1ea', ink: '#221e1a' },
+    sand: { bag: '#c9ad83' },
+    rust: { bag: '#c0a276' },
   };
-  const t = tones[lot.color] || { bg: '#f4f1ea', ink: '#221e1a' };
-  const mono = 'JetBrains Mono, monospace';
-  const serif = 'Newsreader, serif';
+  const t = { ink: '#2a2217', label: '#f6f2e9', ...(tones[lot.color] || tones.sand) };
+  const mono = 'IBM Plex Mono, monospace';
+  const serif = 'Ancizar Serif, serif';
   const nameSize = lot.name.length > 9 ? 27 : 40;
   const sub = `${lot.origin.toLowerCase()} · ${lot.region.toLowerCase()} · ${lot.process}`;
   const specs = [
@@ -125,15 +127,23 @@ export function BagArtwork({ lot }) {
   return (
     <svg viewBox="0 0 280 360" className="bag-art" style={{ width: '100%', height: 'auto' }} xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <pattern id={`grain-${lot.id}`} width="3" height="3" patternUnits="userSpaceOnUse">
-          <rect width="3" height="3" fill={t.bg} />
-          <circle cx="1" cy="1" r="0.4" fill={t.ink} opacity="0.05" />
+        <pattern id={`grain-${lot.id}`} width="4" height="4" patternUnits="userSpaceOnUse">
+          <rect width="4" height="4" fill={t.bag} />
+          <circle cx="1" cy="1" r="0.5" fill={t.ink} opacity="0.08" />
+          <circle cx="3" cy="3" r="0.4" fill="#fff" opacity="0.10" />
+        </pattern>
+        <pattern id={`paper-${lot.id}`} width="5" height="5" patternUnits="userSpaceOnUse">
+          <rect width="5" height="5" fill={t.label} />
+          <circle cx="1.5" cy="2" r="0.45" fill={t.ink} opacity="0.035" />
+          <circle cx="4" cy="4.5" r="0.35" fill={t.ink} opacity="0.03" />
         </pattern>
       </defs>
-      {/* bag shape with fold line */}
+      {/* kraft bag shape with fold line */}
       <path d="M 30 28 L 250 28 L 250 332 Q 250 344 238 344 L 42 344 Q 30 344 30 332 Z"
             fill={`url(#grain-${lot.id})`} stroke={t.ink} strokeWidth="1.2" />
       <line x1="30" y1="48" x2="250" y2="48" stroke={t.ink} strokeWidth="0.6" opacity="0.5" />
+      {/* off-white label panel */}
+      <rect x="42" y="56" width="196" height="272" fill={`url(#paper-${lot.id})`} stroke={t.ink} strokeWidth="0.7" />
 
       {/* header: tower mark + wordmark */}
       <g transform="translate(48 64) scale(0.62)" stroke={t.ink} fill="none" strokeWidth="1.2" strokeLinecap="round">
@@ -168,10 +178,10 @@ export function BagArtwork({ lot }) {
       ))}
 
       {/* footer: roasted_on + weight */}
-      <line x1="48" y1="316" x2="232" y2="316" stroke={t.ink} strokeWidth="0.8" />
-      <text x="48" y="331" fill={t.ink} opacity="0.55" fontFamily={mono} fontSize="8.5">roasted_on</text>
-      <text x="120" y="331" fill={t.ink} fontFamily={mono} fontSize="8.5">{lot.roasted}</text>
-      <text x="232" y="332" textAnchor="end" fill={t.ink} fontFamily={mono} fontSize="10">{lot.weight}</text>
+      <line x1="48" y1="302" x2="232" y2="302" stroke={t.ink} strokeWidth="0.8" />
+      <text x="48" y="317" fill={t.ink} opacity="0.55" fontFamily={mono} fontSize="8.5">roasted_on</text>
+      <text x="120" y="317" fill={t.ink} fontFamily={mono} fontSize="8.5">{lot.roasted}</text>
+      <text x="232" y="318" textAnchor="end" fill={t.ink} fontFamily={mono} fontSize="10">{lot.weight}</text>
     </svg>
   );
 }
@@ -222,12 +232,24 @@ export function FlavorRadar({ lot }) {
             <text key={ax} x={x} y={y}
                   textAnchor="middle"
                   dominantBaseline="middle"
-                  fontFamily="JetBrains Mono, monospace"
+                  fontFamily="IBM Plex Mono, monospace"
                   fontSize="10"
                   fill="var(--ink-2)">{ax}</text>
           );
         })}
       </svg>
+    </div>
+  );
+}
+
+// =================== MODAL ===================
+export function Modal({ open, onClose, children, width = 440 }) {
+  if (!open) return null;
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" style={{ width: `min(${width}px, 100%)` }} onClick={e => e.stopPropagation()}>
+        {children}
+      </div>
     </div>
   );
 }
@@ -260,25 +282,15 @@ export function Footer({ navigate }) {
       <div className="foot-grid">
         <div className="foot-brand">
           <Lattice size={22} className="lattice" />
-          <p>A micro-roastery starting with two origins — a washed Colombia and a natural Ethiopia. We rotate lots when they're gone.</p>
-          <p className="mono" style={{fontSize:12, color:'var(--muted)'}}>est. 2026 · 48.8584° N, 2.2945° E</p>
+          <p>roasted to order</p>
+          <p className="mono" style={{fontSize:12, color:'var(--muted)'}}>est. 2026</p>
         </div>
         <div className="foot-col">
-          <h5>shop</h5>
+          <h5>menu</h5>
           <ul>
-            <li><a onClick={() => navigate({ page: 'shop' })}>all lots</a></li>
-            <li><a onClick={() => navigate({ page: 'subscribe' })}>subscribe</a></li>
-            <li><a>gift cards</a></li>
-            <li><a>wholesale</a></li>
-          </ul>
-        </div>
-        <div className="foot-col">
-          <h5>read</h5>
-          <ul>
+            <li><a onClick={() => navigate({ page: 'shop' })}>origins</a></li>
+            {FEATURES.subscriptions && <li><a onClick={() => navigate({ page: 'subscribe' })}>subscribe</a></li>}
             <li><a onClick={() => navigate({ page: 'about' })}>about</a></li>
-            <li><a>journal</a></li>
-            <li><a>brew guides</a></li>
-            <li><a>sourcing log</a></li>
           </ul>
         </div>
         <div className="foot-col">
@@ -291,7 +303,7 @@ export function Footer({ navigate }) {
       </div>
       <div className="foot-base">
         <span>© 2026 eiffel coffee roasters</span>
-        <span>/* hand-roasted · small-batch · paid-fair */</span>
+        <span>/* there's no one way to coffee */</span>
       </div>
     </footer>
   );

@@ -1,6 +1,12 @@
 /* eiffel.coffee.roasters — lot data + reference info
    The two launch origins, straight from the bag labels. */
 
+// Feature flags. Subscriptions are built but not launched yet —
+// flip to true to restore the flow and its nav/footer entries.
+export const FEATURES = {
+  subscriptions: false,
+};
+
 export const LOTS = [
   {
     id: 1,
@@ -14,12 +20,16 @@ export const LOTS = [
     altitude: '1,800 – 2,200m',
     varietal: 'heirloom',
     score: 87.0,
-    price: 21,
+    price: 16,
     weight: '250g',
+    formats: [
+      { id: 'drip10', label: 'drip bags · box of 10', price: 16 },
+      { id: 'beans250', label: 'whole bean · 250g', price: 21 },
+    ],
     notes: ['prunes', 'raisins', 'stone fruits', "baker's chocolate", 'nougat'],
     flavors: { floral: 0.48, acid: 0.64, body: 0.68, sweet: 0.86, bitter: 0.30, aroma: 0.88 },
     story:
-      'A natural from Bule Hora, in the Guji zone — dried whole in the cherry on raised beds. Dark dried fruit up front, prunes and raisins, softening into stone fruit, with a nougat sweetness and a baker’s-chocolate finish.',
+      'Dried whole in the cherry on raised beds. Prunes and raisins up front, stone fruit, a nougat finish.',
     roasted: '2026.07.13',
     inStock: true,
     featured: true,
@@ -39,12 +49,16 @@ export const LOTS = [
     altitude: '1,500 – 2,000m',
     varietal: 'typica, caturra, castillo',
     score: 84.5,
-    price: 18,
+    price: 14,
     weight: '250g',
+    formats: [
+      { id: 'drip10', label: 'drip bags · box of 10', price: 14 },
+      { id: 'beans250', label: 'whole bean · 250g', price: 18 },
+    ],
     notes: ['toffee', 'red fruit', 'cocoa nibs', 'caramel'],
     flavors: { floral: 0.26, acid: 0.58, body: 0.72, sweet: 0.88, bitter: 0.36, aroma: 0.62 },
     story:
-      'Our everyday Colombian. Excelso-grade lots from smallholder farms across Valle del Cauca, fully washed. Toffee and caramel sweetness, a clean red-fruit acidity, cocoa nibs in the finish. Comfortable as filter, generous as espresso.',
+      'Fully washed lots from smallholder farms across Valle del Cauca. Toffee sweetness, red fruit, cocoa nibs in the finish.',
     roasted: '2026.07.13',
     inStock: true,
     color: 'rust',
@@ -57,13 +71,7 @@ export const PROCESSES = ['all', 'washed', 'natural'];
 export const ROASTS = ['all', 'light', 'medium'];
 export const ORIGINS = ['all', 'Ethiopia', 'Colombia'];
 
-export const GRINDS = [
-  { id: 'whole', label: 'whole bean' },
-  { id: 'espresso', label: 'espresso' },
-  { id: 'v60', label: 'V60 / pour-over' },
-  { id: 'aeropress', label: 'aeropress' },
-  { id: 'french', label: 'french press' },
-];
+// Grind options removed — the shop sells drip bags (no grind) and whole bean.
 
 export const SUB_FREQ = [
   { id: 'weekly', label: 'every week', unit: '1×', desc: 'For households drinking 2+ cups a day. Freshest possible.' },

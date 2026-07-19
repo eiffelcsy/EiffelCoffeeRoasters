@@ -1,39 +1,27 @@
 /* eiffel.coffee.roasters — page components */
 
 import { useState, useMemo } from 'react';
-import { LOTS, PROCESSES, ROASTS, GRINDS, SUB_FREQ, SUB_VOLUME, SUB_PREF } from './data.js';
-import { BagArtwork, Enso, FlavorRadar, QtyRow, Seal } from './components.jsx';
+import { LOTS, PROCESSES, ROASTS, SUB_FREQ, SUB_VOLUME, SUB_PREF } from './data.js';
+import { BagArtwork, FlavorRadar, QtyRow, Modal } from './components.jsx';
 
 // =================== HOME ===================
 export function HomePage({ navigate }) {
   const featured = LOTS.find(l => l.featured) || LOTS[0];
   return (
     <main className="page">
-      <div className="crumb">
-        <span>// no.{String(featured.id).padStart(3,'0')} — {featured.name.toLowerCase()}</span>
-        <span className="dot" />
-        <span>roasted {featured.roasted}</span>
-        <span className="dot" />
-        <span>this week's lot</span>
-      </div>
-
       <section className="home-hero">
-        <Enso size={340} className="home-enso" />
         <div className="home-hero-text">
-          <div className="home-eyebrow">{`> featured · lot.${String(featured.id).padStart(3,'0')}`}</div>
-          <h1>
-            Prunes & <em>nougat</em><br />
-            in your cup.
-          </h1>
-          <p className="home-hero-sub">
-            We're opening the roastery with a natural from Bule Hora, Guji — dark dried fruit, stone fruit, a nougat finish. 250g bags, roasted Mondays, shipped Tuesdays.
-          </p>
+          <h1>Home roasted,<br />for the home barista.</h1>
+          <div className="home-specs">
+            <div className="row"><span className="k">product</span><span className="v">drip coffee bags · box of 10</span></div>
+            <div className="row"><span className="k">also_available</span><span className="v">whole bean · 250g</span></div>
+            <div className="row"><span className="k">origins</span><span className="v">ethiopia · colombia</span></div>
+            <div className="row"><span className="k">roasted</span><span className="v">to order, weekly</span></div>
+            <div className="row"><span className="k">ships</span><span className="v">in 1–2 days</span></div>
+          </div>
           <div className="home-hero-cta-row">
-            <button className="btn is-accent" onClick={() => navigate({ page: 'lot', id: featured.id })}>
-              read the lot <span className="arrow">→</span>
-            </button>
-            <button className="btn is-ghost" onClick={() => navigate({ page: 'shop' })}>
-              browse both origins
+            <button className="btn is-accent" onClick={() => navigate({ page: 'shop' })}>
+              shop coffee <span className="arrow">→</span>
             </button>
           </div>
         </div>
@@ -45,62 +33,71 @@ export function HomePage({ navigate }) {
       <section className="home-strip">
         {LOTS.map((l) => (
           <div key={l.id} className="feat-card" onClick={() => navigate({ page: 'lot', id: l.id })}>
-            <div className="feat-num">{`${String(l.id).padStart(2,'0')} · ${l.origin.toLowerCase()}`}</div>
+            <div className="feat-num">{`${l.origin.toLowerCase()} · ${l.process}`}</div>
             <div className="feat-title">{l.name}</div>
-            <div className="feat-sub">{l.process} · {l.notes.slice(0,2).join(', ')}</div>
           </div>
         ))}
-      </section>
-
-      <section className="home-intro">
-        <div className="home-intro-label">// about</div>
-        <div className="home-intro-body">
-          We're starting with <em>two origins</em> — a washed Colombia and a natural Ethiopia — roasted in small batches and rotated as lots sell out. No blends. No flavored syrups. <em>No mystery.</em> Every bag ships with the altitude, the varietal, the process, and the date it left the drum.
-          <div style={{marginTop: 32}}><span className="seal-stamp"><Seal size={44} /></span></div>
-        </div>
       </section>
     </main>
   );
 }
 
 // =================== SHOP ===================
-export function ShopPage({ navigate }) {
+// Quick-add modal: collects the info needed for the cart (format + quantity).
+function AddToCartModal({ lot, onClose, onAdd }) {
+  const [formatId, setFormatId] = useState(lot.formats[0].id);
+  const [qty, setQty] = useState(1);
+  const format = lot.formats.find(f => f.id === formatId) || lot.formats[0];
+  return (
+    <Modal open onClose={onClose}>
+      <div className="modal-eyebrow">// add to cart</div>
+      <div className="modal-title">{lot.name}</div>
+      <div className="modal-sub">{lot.origin.toLowerCase()} · {lot.region.toLowerCase()} · {lot.process}</div>
+      <div className="option-group">
+        <label>format</label>
+        <div className="grind-row">
+          {lot.formats.map(f => (
+            <button key={f.id}
+                    className={'grind-opt' + (formatId === f.id ? ' is-on' : '')}
+                    onClick={() => setFormatId(f.id)}>{f.label} · ${f.price}</button>
+          ))}
+        </div>
+      </div>
+      <div className="option-group">
+        <label>quantity</label>
+        <QtyRow value={qty} onChange={setQty} />
+      </div>
+      <div className="modal-actions">
+        <button className="btn is-ghost" onClick={onClose}>cancel</button>
+        <button className="btn is-accent" onClick={() => { onAdd(lot, formatId, qty); onClose(); }}>
+          add · ${(format.price * qty).toFixed(2)} <span className="arrow">→</span>
+        </button>
+      </div>
+    </Modal>
+  );
+}
+
+export function ShopPage({ navigate, onAdd }) {
   const [process, setProcess] = useState('all');
   const [roast, setRoast] = useState('all');
   const [sort, setSort] = useState('roasted-desc');
+  const [modalLot, setModalLot] = useState(null);
 
   const filtered = useMemo(() => {
     let l = [...LOTS];
     if (process !== 'all') l = l.filter(x => x.process === process);
     if (roast !== 'all')   l = l.filter(x => x.roast === roast);
     if (sort === 'roasted-desc') l.sort((a,b) => b.roasted.localeCompare(a.roasted));
-    if (sort === 'score-desc')   l.sort((a,b) => b.score - a.score);
     if (sort === 'price-asc')    l.sort((a,b) => a.price - b.price);
     return l;
   }, [process, roast, sort]);
 
   return (
     <main className="page">
-      <div className="crumb">
-        <span>// shop · lots</span>
-        <span className="dot" />
-        <span>{LOTS.length} active</span>
-      </div>
-
       <section className="shop-head">
         <div className="shop-title-row">
-          <h1 className="shop-title">Lots</h1>
+          <h1 className="shop-title">Origins</h1>
           <span className="shop-count">{filtered.length} showing</span>
-        </div>
-        <div className="shop-query">
-          <span className="sql">SELECT</span> * <span className="sql">FROM</span> lots
-          {(process !== 'all' || roast !== 'all') && (
-            <span> <span className="sql">WHERE</span> {[
-              process !== 'all' && `process="${process}"`,
-              roast !== 'all'   && `roast="${roast}"`,
-            ].filter(Boolean).join(' AND ')}</span>
-          )}
-          <span> <span className="sql">ORDER BY</span> {sort.replace('-', ' ')}</span>
         </div>
       </section>
 
@@ -119,43 +116,48 @@ export function ShopPage({ navigate }) {
         ))}
         <select className="sort-select" value={sort} onChange={(e) => setSort(e.target.value)}>
           <option value="roasted-desc">↓ recent</option>
-          <option value="score-desc">↓ score</option>
           <option value="price-asc">↑ price</option>
         </select>
       </section>
 
       <section className="lot-table">
         <div className="lot-row head">
-          <span>lot</span>
+          <span>coffee</span>
           <span>origin</span>
           <span>process</span>
           <span>notes</span>
-          <span>score</span>
-          <span style={{textAlign:'right'}}>price</span>
           <span />
         </div>
         {filtered.map(l => (
           <div key={l.id}
                className={'lot-row' + (!l.inStock ? ' is-out' : '')}
                onClick={() => l.inStock && navigate({ page: 'lot', id: l.id })}>
-            <span className="lot-num">#{String(l.id).padStart(3,'0')}</span>
-            <div className="lot-origin">
-              <span className="name">{l.name}</span>
-              <span className="region">{l.origin.toLowerCase()} · {l.region.toLowerCase()}</span>
-            </div>
+            <span className="lot-name">{l.name}</span>
+            <span className="lot-orig">{l.origin.toLowerCase()} · {l.region.toLowerCase()}</span>
             <span className="lot-process">{l.process}</span>
             <span className="lot-notes">{l.notes.slice(0,3).join(', ')}</span>
-            <span className="lot-score">{l.score}</span>
-            <span className="lot-price">${l.price}</span>
-            <span className="lot-arrow">→</span>
+            <span className="lot-add">
+              {l.inStock ? (
+                <button className="btn is-ghost"
+                        onClick={(e) => { e.stopPropagation(); setModalLot(l); }}>
+                  add · from ${l.price}
+                </button>
+              ) : (
+                <span className="lot-out-label">sold out</span>
+              )}
+            </span>
           </div>
         ))}
         {filtered.length === 0 && (
-          <div style={{padding:'80px 0', textAlign:'center', fontFamily:'var(--serif)', fontStyle:'italic', color:'var(--muted)'}}>
-            No lots match that combination. Try clearing a filter.
+          <div style={{padding:'80px 0', textAlign:'center', fontFamily:'var(--mono)', fontSize:12, color:'var(--muted)'}}>
+            Nothing matches that combination. Try clearing a filter.
           </div>
         )}
       </section>
+
+      {modalLot && (
+        <AddToCartModal lot={modalLot} onClose={() => setModalLot(null)} onAdd={onAdd} />
+      )}
     </main>
   );
 }
@@ -163,15 +165,14 @@ export function ShopPage({ navigate }) {
 // =================== LOT DETAIL ===================
 export function LotPage({ id, navigate, onAdd }) {
   const lot = LOTS.find(l => l.id === id) || LOTS[0];
-  const [grind, setGrind] = useState('whole');
+  const [formatId, setFormatId] = useState(lot.formats[0].id);
   const [qty, setQty] = useState(1);
+  const format = lot.formats.find(f => f.id === formatId) || lot.formats[0];
 
   return (
     <main className="page">
       <div className="crumb">
-        <a onClick={() => navigate({ page: 'shop' })} style={{cursor:'pointer'}}>← all lots</a>
-        <span className="dot" />
-        <span>/ lots / {String(lot.id).padStart(3,'0')}</span>
+        <a onClick={() => navigate({ page: 'shop' })} style={{cursor:'pointer'}}>← all origins</a>
       </div>
 
       <section className="lot-detail">
@@ -182,9 +183,8 @@ export function LotPage({ id, navigate, onAdd }) {
         </div>
 
         <div className="lot-info-col">
-          <div className="lot-eyebrow">{`// lot.${String(lot.id).padStart(3,'0')} · ${lot.process}`}</div>
           <h1 className="lot-title">{lot.name}</h1>
-          <div className="lot-subtitle">{lot.origin.toLowerCase()} · {lot.region.toLowerCase()} · {lot.producer}</div>
+          <div className="lot-subtitle">{lot.origin.toLowerCase()} · {lot.region.toLowerCase()} · {lot.process}</div>
 
           <div className="lot-flavors">
             {lot.notes.map(n => <span key={n} className="flavor-pill">{n}</span>)}
@@ -205,12 +205,12 @@ export function LotPage({ id, navigate, onAdd }) {
           </div>
 
           <div className="option-group">
-            <label>grind</label>
+            <label>format</label>
             <div className="grind-row">
-              {GRINDS.map(g => (
-                <button key={g.id}
-                        className={'grind-opt' + (grind === g.id ? ' is-on' : '')}
-                        onClick={() => setGrind(g.id)}>{g.label}</button>
+              {lot.formats.map(f => (
+                <button key={f.id}
+                        className={'grind-opt' + (formatId === f.id ? ' is-on' : '')}
+                        onClick={() => setFormatId(f.id)}>{f.label} · ${f.price}</button>
               ))}
             </div>
           </div>
@@ -221,15 +221,13 @@ export function LotPage({ id, navigate, onAdd }) {
           </div>
 
           <div className="add-row">
-            <button className="btn is-accent" onClick={() => onAdd(lot, grind, qty)}>
-              add to cart · ${(lot.price * qty).toFixed(2)} <span className="arrow">→</span>
+            <button className="btn is-accent" onClick={() => onAdd(lot, formatId, qty)}>
+              add to cart · ${(format.price * qty).toFixed(2)} <span className="arrow">→</span>
             </button>
           </div>
 
           <div className="lot-meta">
-            <span>// ships in 1–2 days</span>
-            <span>· free shipping over $40</span>
-            <span>· roasted to order</span>
+            <span>roasted to order · ships in 1–2 days · free over $40</span>
           </div>
         </div>
       </section>
@@ -391,36 +389,25 @@ export function SubscribePage({ navigate, onSubscribe }) {
 export function AboutPage({ navigate }) {
   return (
     <main className="page">
-      <div className="crumb">
-        <span>// about</span>
-        <span className="dot" />
-        <span>est. 2026</span>
-      </div>
-
       <section style={{padding:'80px 0 60px', maxWidth: 880}}>
-        <div className="home-eyebrow">/* who we are */</div>
-        <h1 style={{fontFamily:'var(--serif)', fontWeight:300, fontSize:'clamp(40px,5vw,68px)', letterSpacing:'-0.02em', lineHeight:1.02, margin:'0 0 36px'}}>
+        <h1 style={{fontFamily:'var(--serif)', fontWeight:600, fontSize:'clamp(40px,5vw,68px)', letterSpacing:'-0.02em', lineHeight:1.02, margin:'0 0 36px'}}>
           A small roastery that <em style={{color:'var(--accent)'}}>documents everything</em>.
         </h1>
-        <p style={{fontFamily:'var(--serif)', fontSize:22, lineHeight:1.55, color:'var(--ink-2)', marginBottom:24, maxWidth:700}}>
-          Eiffel is a small operation: one roaster, a laptop running a roast profiler, and a cupping sheet for every lot we've ever bought. We're starting with two origins and we'll grow the menu one lot at a time.
-        </p>
-        <p style={{fontFamily:'var(--serif)', fontSize:18, lineHeight:1.6, color:'var(--ink-2)', maxWidth:680}}>
-          We treat every batch like a small data problem: green analysis, profile, dev-time, weight loss, cupping score. We publish all of it. If you want to know exactly what happened to the beans in your bag, the label tells you — origin, altitude, varietal, process, and the day it was roasted.
+        <p style={{fontFamily:'var(--mono)', fontSize:14, lineHeight:1.8, color:'var(--ink-2)', maxWidth:620, margin:0}}>
+          One roaster, a roast profiler, a cupping sheet for every lot. Everything we know is on the label — origin, altitude, varietal, process, roast date.
         </p>
       </section>
 
-      <section style={{padding:'40px 0 80px', borderTop:'1px solid var(--rule)'}}>
-        <div className="home-eyebrow" style={{margin:'40px 0 28px'}}>/* by the numbers */</div>
+      <section style={{padding:'56px 0 80px', borderTop:'1px solid var(--rule)'}}>
         <div style={{display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap:'var(--gutter)'}}>
           {[
-            { v: '2', k: 'origins on the menu' },
-            { v: '250g', k: 'bag size' },
+            { v: '10', k: 'drip bags per box' },
+            { v: '250g', k: 'whole bean bags' },
             { v: '2,200m', k: 'highest farm altitude' },
-            { v: 'nº 001', k: 'first roast · 2026' },
+            { v: '001', k: 'first roast · 2026' },
           ].map(s => (
             <div key={s.k} style={{borderTop:'1px solid var(--rule)', paddingTop:18}}>
-              <div style={{fontFamily:'var(--serif)', fontSize:64, fontWeight:300, letterSpacing:'-0.02em', lineHeight:1}}>{s.v}</div>
+              <div style={{fontFamily:'var(--serif)', fontSize:64, fontWeight:500, letterSpacing:'-0.02em', lineHeight:1}}>{s.v}</div>
               <div style={{fontFamily:'var(--mono)', fontSize:11, color:'var(--muted)', marginTop:6}}>{s.k}</div>
             </div>
           ))}
