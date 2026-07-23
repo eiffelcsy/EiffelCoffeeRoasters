@@ -233,6 +233,7 @@ export function Footer({ navigate }) {
             <li><a onClick={() => navigate({ page: 'shop' })}>shop</a></li>
             {FEATURES.subscriptions && <li><a onClick={() => navigate({ page: 'subscribe' })}>subscribe</a></li>}
             <li><a onClick={() => navigate({ page: 'about' })}>about</a></li>
+            <li><a onClick={() => navigate({ page: 'feedback' })}>feedback</a></li>
           </ul>
         </div>
         <div className="foot-col">

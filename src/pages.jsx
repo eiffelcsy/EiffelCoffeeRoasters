@@ -370,6 +370,144 @@ export function SubscribePage({ navigate, onSubscribe }) {
   );
 }
 
+// =================== FEEDBACK ===================
+// Paste a form endpoint here to collect responses — e.g. a Formspree URL
+// ("https://formspree.io/f/xxxxxxxx") or your own API that accepts a JSON POST.
+// Until this is set, submissions are saved only to THIS browser's localStorage
+// (fine for your own testing, but real customer scans need a real endpoint).
+const FEEDBACK_ENDPOINT = '';
+
+export function FeedbackPage({ navigate, origin }) {
+  const [rating, setRating]   = useState(0);
+  const [email, setEmail]     = useState('');
+  const [comments, setComments] = useState('');
+  const [status, setStatus]   = useState('idle'); // idle | sending | done | error
+
+  // Which bag this scan came from — carried by the QR code as #feedback/<slug>.
+  const originLot = origin ? LOTS.find(l => l.slug === origin) : null;
+
+  async function submit(e) {
+    e.preventDefault();
+    if (!rating) return;
+    setStatus('sending');
+    const payload = {
+      rating,
+      email: email.trim(),
+      comments: comments.trim(),
+      // hidden: which origin the bag was, from the QR code on its label
+      origin: origin || 'unspecified',
+      originName: originLot ? originLot.name : '',
+      at: new Date().toISOString(),
+    };
+    try {
+      if (FEEDBACK_ENDPOINT) {
+        const res = await fetch(FEEDBACK_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) throw new Error('status ' + res.status);
+      } else {
+        // No endpoint configured yet — keep locally so your own testing isn't
+        // lost, and warn loudly. Real customer feedback needs FEEDBACK_ENDPOINT.
+        console.warn('[feedback] FEEDBACK_ENDPOINT is not set — saved to localStorage only.');
+        const key = 'eiffel.feedback';
+        const all = JSON.parse(localStorage.getItem(key) || '[]');
+        all.push(payload);
+        localStorage.setItem(key, JSON.stringify(all));
+      }
+      setStatus('done');
+    } catch {
+      setStatus('error');
+    }
+  }
+
+  if (status === 'done') {
+    return (
+      <main className="page feedback-page">
+        <div className="feedback-done">
+          <div className="feedback-check">✓</div>
+          <h1 className="feedback-title">Thank you.</h1>
+          <p className="feedback-lead">
+            Every cup helps us dial in the roast. We read all of it.
+          </p>
+          <button className="btn is-accent" onClick={() => navigate({ page: 'home' })}>
+            back to home <span className="arrow">→</span>
+          </button>
+        </div>
+      </main>
+    );
+  }
+
+  return (
+    <main className="page feedback-page">
+      <form className="feedback-form" onSubmit={submit}>
+        <div className="feedback-eyebrow">
+          // feedback{originLot ? ` · ${originLot.name.toLowerCase()}` : ''}
+        </div>
+        <h1 className="feedback-title">How was your coffee?</h1>
+        <p className="feedback-lead">
+          We're just getting started, and your honest take is the most useful thing we can get. Takes ten seconds.
+        </p>
+
+        <div className="feedback-field">
+          <label className="feedback-label">rating <span className="req">· required</span></label>
+          <div className="likert" role="radiogroup" aria-label="rating from 1 (bad) to 5 (good)">
+            {[1,2,3,4,5].map(n => (
+              <button
+                type="button"
+                key={n}
+                className={'likert-opt' + (rating === n ? ' is-on' : '')}
+                aria-pressed={rating === n}
+                aria-label={`${n} out of 5`}
+                onClick={() => setRating(n)}>
+                {n}
+              </button>
+            ))}
+          </div>
+          <div className="likert-ends">
+            <span>1 · bad</span>
+            <span>good · 5</span>
+          </div>
+        </div>
+
+        <div className="feedback-field">
+          <label className="feedback-label" htmlFor="fb-email">email <span className="opt">· optional</span></label>
+          <input
+            id="fb-email"
+            className="feedback-input"
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)} />
+          <div className="feedback-hint">only if you'd like us to reply.</div>
+        </div>
+
+        <div className="feedback-field">
+          <label className="feedback-label" htmlFor="fb-comments">comments <span className="opt">· optional</span></label>
+          <textarea
+            id="fb-comments"
+            className="feedback-input feedback-textarea"
+            rows={4}
+            placeholder="too sour? too flat? just right? tell us anything."
+            value={comments}
+            onChange={(e) => setComments(e.target.value)} />
+        </div>
+
+        {status === 'error' && (
+          <div className="feedback-error">Something went wrong sending that — please try again.</div>
+        )}
+
+        <button className="btn is-accent feedback-submit" type="submit" disabled={!rating || status === 'sending'}>
+          {status === 'sending' ? 'sending…' : 'send feedback'} <span className="arrow">→</span>
+        </button>
+      </form>
+    </main>
+  );
+}
+
 // =================== ABOUT ===================
 export function AboutPage({ navigate }) {
   return (

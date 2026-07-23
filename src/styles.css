@@ -939,6 +939,113 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
   color: var(--muted);
 }
 
+/* ============== FEEDBACK ============== */
+.feedback-page { max-width: 620px; }
+.feedback-form { padding: 64px 0 96px; }
+.feedback-eyebrow {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 18px;
+}
+.feedback-title {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: clamp(38px, 5vw, 60px);
+  letter-spacing: -0.02em;
+  line-height: 1.02;
+  margin: 0 0 18px;
+}
+.feedback-lead {
+  font-family: var(--mono);
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--ink-2);
+  margin: 0 0 44px;
+  max-width: 460px;
+}
+.feedback-field { margin-bottom: 32px; }
+.feedback-label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ink);
+  margin-bottom: 12px;
+}
+.feedback-label .opt,
+.feedback-label .req { color: var(--muted); }
+
+/* likert scale */
+.likert {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+.likert-opt {
+  height: 60px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-family: var(--mono);
+  font-size: 18px;
+  color: var(--ink-2);
+  background: transparent;
+  cursor: pointer;
+  transition: all var(--t-fast);
+}
+.likert-opt:hover { border-color: var(--ink); color: var(--ink); }
+.likert-opt.is-on {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--paper);
+}
+.likert-ends {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* text fields */
+.feedback-input {
+  width: 100%;
+  font-family: var(--mono);
+  font-size: 15px;
+  color: var(--ink);
+  background: var(--paper-2);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 13px 14px;
+  transition: border-color var(--t-fast);
+}
+.feedback-input::placeholder { color: var(--muted); }
+.feedback-input:focus { outline: none; border-color: var(--ink); }
+.feedback-textarea { resize: vertical; min-height: 96px; line-height: 1.6; }
+.feedback-hint {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+.feedback-error {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--seal);
+  margin-bottom: 20px;
+}
+.feedback-submit { margin-top: 8px; }
+
+/* success state */
+.feedback-done { padding: 96px 0; text-align: center; }
+.feedback-check {
+  font-family: var(--mono);
+  font-size: 40px;
+  color: var(--accent);
+  margin-bottom: 20px;
+}
+.feedback-done .feedback-lead { margin: 0 auto 36px; }
+
 /* ============== MODALS ============== */
 .modal-overlay {
   position: fixed;

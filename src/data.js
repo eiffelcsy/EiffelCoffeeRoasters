@@ -10,6 +10,7 @@ export const FEATURES = {
 export const LOTS = [
   {
     id: 1,
+    slug: 'guji-bule-hora', // stable id for URLs / QR codes (#feedback/<slug>)
     name: 'Guji Bule Hora',
     origin: 'Ethiopia',
     region: 'Bule Hora',
@@ -42,6 +43,7 @@ export const LOTS = [
   },
   {
     id: 2,
+    slug: 'excelso', // stable id for URLs / QR codes (#feedback/<slug>)
     name: 'Excelso',
     origin: 'Colombia',
     region: 'Valle del Cauca',

@@ -3,7 +3,20 @@
 import { useState, useEffect } from 'react';
 import { LOTS, FEATURES } from './data.js';
 import { TopNav, Footer, Toast, OriginArt, QtyRow, Modal } from './components.jsx';
-import { HomePage, ShopPage, LotPage, SubscribePage, AboutPage } from './pages.jsx';
+import { HomePage, ShopPage, LotPage, SubscribePage, AboutPage, FeedbackPage } from './pages.jsx';
+
+// Top-level pages that can be deep-linked via URL hash (e.g. a QR code on the
+// packaging pointing at https://your-site/#feedback lands right on the form).
+const HASH_PAGES = ['shop', 'about', 'feedback'];
+
+function routeFromHash() {
+  const raw = (window.location.hash || '').replace(/^#\/?/, '').toLowerCase();
+  const [page, ...rest] = raw.split('/');
+  if (!HASH_PAGES.includes(page)) return { page: 'home' };
+  // #feedback/<origin-slug> — the QR code on each bag carries its own slug
+  if (page === 'feedback' && rest[0]) return { page, origin: rest[0] };
+  return { page };
+}
 
 const formatOf = (i) => i.lot.formats.find(f => f.id === i.formatId) || i.lot.formats[0];
 
@@ -107,7 +120,7 @@ function saveCart(items) {
 }
 
 export default function App() {
-  const [route, setRoute] = useState({ page: 'home' });
+  const [route, setRoute] = useState(routeFromHash);
   const [cart, setCart] = useState(loadCart);
   const [cartOpen, setCartOpen] = useState(false);
   const [bumped, setBumped] = useState(false);
@@ -115,12 +128,29 @@ export default function App() {
 
   useEffect(() => { saveCart(cart); }, [cart]);
 
+  // keep the app in sync if the user edits the URL / uses back-forward
+  useEffect(() => {
+    const onHash = () => setRoute(routeFromHash());
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []);
+
   // scroll top on navigation
   useEffect(() => {
     try { window.scrollTo({ top: 0, behavior: 'instant' }); } catch { /* older browsers */ }
   }, [route]);
 
-  const navigate = (r) => setRoute(r);
+  const navigate = (r) => {
+    setRoute(r);
+    // mirror simple pages into the URL hash (refresh- and share-safe) without
+    // firing hashchange, so it never loops back through the listener above.
+    const hash = (!r.id && HASH_PAGES.includes(r.page))
+      ? '#' + r.page + (r.page === 'feedback' && r.origin ? '/' + r.origin : '')
+      : '';
+    try {
+      history.replaceState(null, '', hash || window.location.pathname + window.location.search);
+    } catch { /* non-browser env */ }
+  };
 
   const addToCart = (lot, formatId, qty) => {
     setCart(prev => {
@@ -152,6 +182,7 @@ export default function App() {
   else if (route.page === 'lot')  pageEl = <LotPage id={route.id} navigate={navigate} onAdd={addToCart} />;
   else if (route.page === 'subscribe' && FEATURES.subscriptions) pageEl = <SubscribePage navigate={navigate} onSubscribe={() => {}} />;
   else if (route.page === 'about') pageEl = <AboutPage navigate={navigate} />;
+  else if (route.page === 'feedback') pageEl = <FeedbackPage navigate={navigate} origin={route.origin} />;
   else pageEl = <HomePage navigate={navigate} />;
 
   return (
