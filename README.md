@@ -13,8 +13,8 @@ list in `src/data.js` later. Taglines: "home roasted, for the home barista"
 
 ## Stack
 
-Vite + React 18. No backend — lot data lives in `src/data.js`; the cart persists
-to `localStorage`.
+Vite + React 18. Lot data lives in `src/data.js`; the cart persists to
+`localStorage`. Feedback and orders are stored in Supabase (see below).
 
 Typography follows the bag labels: bold serif for titles, IBM Plex Mono for
 everything else. The palette is textured off-white on kraft cardboard, matching
@@ -31,19 +31,27 @@ format) and whole bean 250g — defined per lot in `src/data.js`.
 The subscription flow is built but disabled — flip `FEATURES.subscriptions` in
 `src/data.js` to restore it (nav link, footer link, and route all come back).
 
+## Backend (Supabase)
+
+Feedback and orders are stored in a linked Supabase project (see `supabase/schema.sql`
+for the exact tables/policies applied). The client reads its connection info from
+Vite env vars — copy `.env.example` to `.env` and fill in `VITE_SUPABASE_URL` and
+`VITE_SUPABASE_ANON_KEY` (Project Settings → API in the Supabase dashboard). The
+anon key is safe to ship to the browser: every table it touches has row-level
+security enabled and only grants `INSERT` — nothing can be read, updated, or
+deleted with it. Read/manage data from the Supabase dashboard's table editor.
+
+Tables:
+- `feedback` — one row per submission from the form below
+- `orders` / `order_items` — one row per checkout, in cart-not-payment form (see
+  the "Orders / checkout" section)
+
 ## Feedback form
 
 A short feedback form lives at `#feedback` (linked in the footer, and meant to
 be the target of a QR code on the drip-bag packaging). It collects an optional
-email, a required 1–5 rating (1 bad, 5 good), and optional comments.
-
-**To actually collect responses you must set an endpoint.** Open `src/pages.jsx`
-and set `FEEDBACK_ENDPOINT` (near the `FeedbackPage` component) to a URL that
-accepts a JSON `POST` — the easiest option is a free [Formspree](https://formspree.io)
-form (`https://formspree.io/f/xxxxxxxx`), but any endpoint works. **Until you set
-it, submissions are saved only to the visitor's own browser `localStorage`** (under
-`eiffel.feedback`) and a console warning is logged — useful for your own testing,
-but customer scans on their phones will not reach you.
+email, a required 1–5 rating (1 bad, 5 good), and optional comments, and inserts
+directly into the `feedback` table.
 
 For the QR code, point it at `https://your-domain/#feedback` — the app reads the
 URL hash on load and opens the form directly.
@@ -57,10 +65,19 @@ its `slug` (defined in `src/data.js`):
 - Excelso → `https://your-domain/#feedback/excelso`
 
 The origin is captured in every submission as `origin` (the slug) and
-`originName` (the readable name); a plain `#feedback` scan records
+`origin_name` (the readable name); a plain `#feedback` scan records
 `origin: "unspecified"`. The form also shows the coffee's name in its header so
 the customer can confirm they're rating the right bag. New origins get their own
 URL automatically — just give the lot a `slug` in `src/data.js`.
+
+## Orders / checkout
+
+Clicking "checkout" in the cart drawer opens a form (name, email, shipping
+address) and, on submit, writes an `orders` row plus one `order_items` row per
+cart line to Supabase with `status: 'pending'`, then clears the cart. **No
+payment is collected yet** — this only records what the customer wants to buy
+so you have a queue to work from; wire up a real payment/checkout API later and
+have it flip `status` to `'paid'` (or add new statuses as needed).
 
 ## Run
 
@@ -77,5 +94,7 @@ npm run build    # production build in dist/
 - `src/components.jsx` — tower mark / brand lockup, nav, bag artwork (SVG
   replica of the printed labels), flavor radar, footer
 - `src/pages.jsx` — home, shop, lot detail, 4-step subscribe flow, about, feedback
-- `src/App.jsx` — routing, cart drawer, toast
+- `src/App.jsx` — routing, cart drawer, checkout form, toast
+- `src/supabaseClient.js` — Supabase client, reads `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY`
 - `src/styles.css` — the design system (Newsreader + JetBrains Mono, paper palette)
+- `supabase/schema.sql` — the tables + RLS policies applied to the linked project

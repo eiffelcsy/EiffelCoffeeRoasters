@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { LOTS, FEATURES } from './data.js';
 import { TopNav, Footer, Toast, OriginArt, QtyRow, Modal } from './components.jsx';
 import { HomePage, ShopPage, LotPage, SubscribePage, AboutPage, FeedbackPage } from './pages.jsx';
+import { supabase } from './supabaseClient.js';
 
 // Top-level pages that can be deep-linked via URL hash (e.g. a QR code on the
 // packaging pointing at https://your-site/#feedback lands right on the form).
@@ -20,11 +21,131 @@ function routeFromHash() {
 
 const formatOf = (i) => i.lot.formats.find(f => f.id === i.formatId) || i.lot.formats[0];
 
-function CartDrawer({ open, onClose, items, onUpdateQty, onRemove, navigate }) {
-  const [pendingRemove, setPendingRemove] = useState(null);
+function cartTotals(items) {
   const subtotal = items.reduce((s, i) => s + formatOf(i).price * i.qty, 0);
   const shipping = subtotal === 0 ? 0 : subtotal >= 40 ? 0 : 6;
-  const total = subtotal + shipping;
+  return { subtotal, shipping, total: subtotal + shipping };
+}
+
+// Collects shipping details and records the order in Supabase (status:
+// 'pending'). No payment is taken here — that's a future integration that
+// will update the order's status once it's wired up.
+function CheckoutModal({ open, onClose, items, onPlaced }) {
+  const [form, setForm] = useState({
+    name: '', email: '', address1: '', address2: '', city: '', state: '', postal: '', country: '',
+  });
+  const [status, setStatus] = useState('idle'); // idle | sending | error
+  const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }));
+  const { subtotal, shipping, total } = cartTotals(items);
+
+  const valid = form.name.trim() && form.email.trim() && form.address1.trim()
+    && form.city.trim() && form.postal.trim() && form.country.trim();
+
+  async function submit(e) {
+    e.preventDefault();
+    if (!valid || status === 'sending') return;
+    setStatus('sending');
+
+    const orderId = crypto.randomUUID();
+    const { error: orderErr } = await supabase.from('orders').insert({
+      id: orderId,
+      customer_name: form.name.trim(),
+      customer_email: form.email.trim(),
+      address_line1: form.address1.trim(),
+      address_line2: form.address2.trim() || null,
+      city: form.city.trim(),
+      state: form.state.trim() || null,
+      postal_code: form.postal.trim(),
+      country: form.country.trim(),
+      subtotal,
+      shipping,
+      total,
+    });
+    if (orderErr) { setStatus('error'); return; }
+
+    const itemRows = items.map(i => {
+      const f = formatOf(i);
+      return {
+        order_id: orderId,
+        lot_id: i.lot.id,
+        lot_name: i.lot.name,
+        format_id: i.formatId,
+        format_label: f.label,
+        unit_price: f.price,
+        qty: i.qty,
+        line_total: f.price * i.qty,
+      };
+    });
+    const { error: itemsErr } = await supabase.from('order_items').insert(itemRows);
+    if (itemsErr) { setStatus('error'); return; }
+
+    setStatus('idle');
+    setForm({ name: '', email: '', address1: '', address2: '', city: '', state: '', postal: '', country: '' });
+    onPlaced();
+  }
+
+  return (
+    <Modal open={open} onClose={onClose} width={480}>
+      <div className="modal-eyebrow">// checkout</div>
+      <div className="modal-title">Shipping details</div>
+      <div className="modal-sub">No payment is collected yet — we'll email you to confirm and arrange it.</div>
+
+      <form onSubmit={submit}>
+        <div className="option-group">
+          <label>name</label>
+          <input className="feedback-input" value={form.name} onChange={set('name')} required />
+        </div>
+        <div className="option-group">
+          <label>email</label>
+          <input className="feedback-input" type="email" inputMode="email" value={form.email} onChange={set('email')} required />
+        </div>
+        <div className="option-group">
+          <label>address line 1</label>
+          <input className="feedback-input" value={form.address1} onChange={set('address1')} required />
+        </div>
+        <div className="option-group">
+          <label>address line 2 (optional)</label>
+          <input className="feedback-input" value={form.address2} onChange={set('address2')} />
+        </div>
+        <div className="option-group" style={{ display: 'flex', gap: 12 }}>
+          <div style={{ flex: 2 }}>
+            <label>city</label>
+            <input className="feedback-input" value={form.city} onChange={set('city')} required />
+          </div>
+          <div style={{ flex: 1 }}>
+            <label>state</label>
+            <input className="feedback-input" value={form.state} onChange={set('state')} />
+          </div>
+        </div>
+        <div className="option-group" style={{ display: 'flex', gap: 12 }}>
+          <div style={{ flex: 1 }}>
+            <label>postal code</label>
+            <input className="feedback-input" value={form.postal} onChange={set('postal')} required />
+          </div>
+          <div style={{ flex: 1 }}>
+            <label>country</label>
+            <input className="feedback-input" value={form.country} onChange={set('country')} required />
+          </div>
+        </div>
+
+        {status === 'error' && (
+          <div className="feedback-error">Something went wrong placing that order — please try again.</div>
+        )}
+
+        <div className="modal-actions">
+          <button type="button" className="btn is-ghost" onClick={onClose}>cancel</button>
+          <button type="submit" className="btn is-accent" disabled={!valid || status === 'sending'}>
+            {status === 'sending' ? 'placing order…' : `place order · $${total.toFixed(2)}`} <span className="arrow">→</span>
+          </button>
+        </div>
+      </form>
+    </Modal>
+  );
+}
+
+function CartDrawer({ open, onClose, items, onUpdateQty, onRemove, onCheckout, navigate }) {
+  const [pendingRemove, setPendingRemove] = useState(null);
+  const { subtotal, shipping, total } = cartTotals(items);
   const pendingItem = pendingRemove !== null ? items[pendingRemove] : null;
 
   return (
@@ -77,7 +198,7 @@ function CartDrawer({ open, onClose, items, onUpdateQty, onRemove, navigate }) {
               <span>total</span>
               <span>${total.toFixed(2)}</span>
             </div>
-            <button className="btn is-accent">
+            <button className="btn is-accent" onClick={onCheckout}>
               checkout <span className="arrow">→</span>
             </button>
           </div>
@@ -123,6 +244,7 @@ export default function App() {
   const [route, setRoute] = useState(routeFromHash);
   const [cart, setCart] = useState(loadCart);
   const [cartOpen, setCartOpen] = useState(false);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [bumped, setBumped] = useState(false);
   const [toast, setToast] = useState({ show: false, msg: '' });
 
@@ -173,6 +295,13 @@ export default function App() {
   const removeFromCart = (idx) => {
     setCart(prev => prev.filter((_, ix) => ix !== idx));
   };
+  const onOrderPlaced = () => {
+    setCart([]);
+    setCheckoutOpen(false);
+    setCartOpen(false);
+    setToast({ show: true, msg: 'order received · we’ll email you to confirm' });
+    setTimeout(() => setToast(t => ({ ...t, show: false })), 2400);
+  };
 
   const cartCount = cart.reduce((s, i) => s + i.qty, 0);
 
@@ -206,7 +335,14 @@ export default function App() {
         items={cart}
         onUpdateQty={updateQty}
         onRemove={removeFromCart}
+        onCheckout={() => setCheckoutOpen(true)}
         navigate={navigate} />
+
+      <CheckoutModal
+        open={checkoutOpen}
+        onClose={() => setCheckoutOpen(false)}
+        items={cart}
+        onPlaced={onOrderPlaced} />
 
       <Toast show={toast.show} message={toast.msg} />
     </>

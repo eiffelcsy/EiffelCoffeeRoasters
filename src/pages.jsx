@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import { LOTS, PROCESSES, ROASTS, SUB_FREQ, SUB_VOLUME, SUB_PREF } from './data.js';
 import { OriginArt, OriginCarousel, FlavorRadar, QtyRow, Modal } from './components.jsx';
+import { supabase } from './supabaseClient.js';
 
 // =================== HOME ===================
 export function HomePage({ navigate }) {
@@ -371,12 +372,6 @@ export function SubscribePage({ navigate, onSubscribe }) {
 }
 
 // =================== FEEDBACK ===================
-// Paste a form endpoint here to collect responses — e.g. a Formspree URL
-// ("https://formspree.io/f/xxxxxxxx") or your own API that accepts a JSON POST.
-// Until this is set, submissions are saved only to THIS browser's localStorage
-// (fine for your own testing, but real customer scans need a real endpoint).
-const FEEDBACK_ENDPOINT = '';
-
 export function FeedbackPage({ navigate, origin }) {
   const [rating, setRating]   = useState(0);
   const [email, setEmail]     = useState('');
@@ -390,36 +385,15 @@ export function FeedbackPage({ navigate, origin }) {
     e.preventDefault();
     if (!rating) return;
     setStatus('sending');
-    const payload = {
+    const { error } = await supabase.from('feedback').insert({
       rating,
-      email: email.trim(),
-      comments: comments.trim(),
-      // hidden: which origin the bag was, from the QR code on its label
+      email: email.trim() || null,
+      comments: comments.trim() || null,
+      // which bag this scan came from, from the QR code on its label
       origin: origin || 'unspecified',
-      originName: originLot ? originLot.name : '',
-      at: new Date().toISOString(),
-    };
-    try {
-      if (FEEDBACK_ENDPOINT) {
-        const res = await fetch(FEEDBACK_ENDPOINT, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify(payload),
-        });
-        if (!res.ok) throw new Error('status ' + res.status);
-      } else {
-        // No endpoint configured yet — keep locally so your own testing isn't
-        // lost, and warn loudly. Real customer feedback needs FEEDBACK_ENDPOINT.
-        console.warn('[feedback] FEEDBACK_ENDPOINT is not set — saved to localStorage only.');
-        const key = 'eiffel.feedback';
-        const all = JSON.parse(localStorage.getItem(key) || '[]');
-        all.push(payload);
-        localStorage.setItem(key, JSON.stringify(all));
-      }
-      setStatus('done');
-    } catch {
-      setStatus('error');
-    }
+      origin_name: originLot ? originLot.name : null,
+    });
+    setStatus(error ? 'error' : 'done');
   }
 
   if (status === 'done') {
