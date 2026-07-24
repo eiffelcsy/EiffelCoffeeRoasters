@@ -195,11 +195,10 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
   display: grid;
   grid-template-columns: 1.05fr 1fr;
   gap: var(--gutter);
-  padding: 48px 0 80px;
+  padding: 56px 0 80px;
   align-items: start;
   position: relative;
 }
-.home-hero-text { padding-top: 24px; }
 .home-eyebrow {
   font-family: var(--mono);
   font-size: 14px;
@@ -617,6 +616,35 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
   margin: 0;
 }
 .radar-svg { width: 100%; height: auto; display: block; }
+
+/* ============== ABOUT ============== */
+.about-hero {
+  max-width: 640px;
+  padding: 56px 0 80px;
+}
+.about-hero h1 {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: clamp(40px, 5vw, 64px);
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  margin: 0 0 56px;
+  text-wrap: balance;
+}
+.about-hero h1 em { font-style: italic; font-weight: 500; color: var(--accent); }
+.about-body {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+.about-body p {
+  font-family: var(--mono);
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--ink-2);
+  margin: 0;
+  max-width: 560px;
+}
 
 /* ============== SUBSCRIBE FLOW ============== */
 .sub-page {

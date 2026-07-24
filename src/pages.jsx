@@ -11,7 +11,7 @@ export function HomePage({ navigate }) {
     <main className="page">
       <section className="home-hero">
         <div className="home-hero-text">
-          <h1>There's no one way <br /> to coffee.</h1>
+          <h1>There's no one way <br /> to <em>coffee</em>.</h1>
           <div className="home-specs">
             <div className="row"><span className="k">product</span><span className="v">drip coffee bags · box of 5</span></div>
             <div className="row"><span className="k">also_available</span><span className="v">whole beans · 200g</span></div>
@@ -421,7 +421,7 @@ export function FeedbackPage({ navigate, origin }) {
         </div>
         <h1 className="feedback-title">How was your coffee?</h1>
         <p className="feedback-lead">
-          We're just getting started, and your honest take is the most useful thing we can get. Takes ten seconds.
+          We're just getting started, and your honest take is the most useful thing we can get. Thank you!
         </p>
 
         <div className="feedback-field">
@@ -486,13 +486,14 @@ export function FeedbackPage({ navigate, origin }) {
 export function AboutPage({ navigate }) {
   return (
     <main className="page">
-      <section style={{padding:'80px 0 60px', maxWidth: 880}}>
-        <h1 style={{fontFamily:'var(--serif)', fontWeight:600, fontSize:'clamp(40px,5vw,68px)', letterSpacing:'-0.02em', lineHeight:1.02, margin:'0 0 36px'}}>
-          A small roastery that <em style={{color:'var(--accent)'}}>documents everything</em>.
-        </h1>
-        <p style={{fontFamily:'var(--mono)', fontSize:16, lineHeight:1.8, color:'var(--ink-2)', maxWidth:620, margin:0}}>
-          One roaster, a roast profiler, a cupping sheet for every lot. Everything we know is on the label — origin, altitude, varietal, process, roast date.
-        </p>
+      <section className="about-hero">
+        <h1>Roasted with care, <em>one small batch at a time</em>.</h1>
+        <div className="about-body">
+          <p>This roastery began with a single bag of green beans, a small home roaster, and a genuine love for coffee that turned into a habit of learning by doing. There was no formal training behind that first batch, just curiosity, patience, and a willingness to get it wrong before getting it right.</p>
+          <p>We believe good coffee isn't about intimidating jargon or unreachable expertise. It's about care. Care in sourcing good green beans, and roasting them in small batches, by hand, slowly enough to bring out what's actually in the bean. Every order is roasted fresh, so what reaches you is always close to its roast date.</p>
+          <p>We're not a seasoned coffee professional, and we don't pretend to be one. This is a craft still in progress, and we treat that as a feature rather than a flaw. Every bag reflects real attention, and we're always chasing a slightly better cup than the one before it.</p>
+          <p>We'd love for you to come along for the journey.</p>
+        </div>
       </section>
     </main>
   );
